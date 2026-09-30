@@ -1,0 +1,22 @@
+# Build output
+bin/
+obj/
+
+# Publish output (large, self-contained; distributed via GitHub Releases)
+dist/
+dist-selfcontained/
+
+# Compiled installer (uploaded as a release asset, not tracked in source)
+installer/*.exe
+
+# IDE / user files
+*.user
+.vs/
+.idea/
+
+# A real baked-in cloud key must never be committed. The tracked cloud.key
+# holds only the placeholder; if you paste a real key in to build a shareable
+# copy, git will show it as modified — do not commit that change.
+# (cloud.key itself stays tracked as the placeholder; see SHARING.md.)
+
+installer/*.zip

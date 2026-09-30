@@ -1,0 +1,129 @@
+<Window x:Class="ScreenAssistant.UI.OverlayWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ScreenAssistant"
+        Width="560" MaxHeight="660" SizeToContent="Height"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Topmost="True" ShowInTaskbar="False" WindowStartupLocation="Manual"
+        Visibility="Hidden" ResizeMode="NoResize"
+        FontFamily="Segoe UI Variable Text, Segoe UI" TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="ClearType" UseLayoutRounding="True">
+
+    <Window.Resources>
+        <!-- Palette -->
+        <SolidColorBrush x:Key="Accent" Color="#8AB4F8"/>
+        <SolidColorBrush x:Key="Muted" Color="#80FFFFFF"/>
+        <LinearGradientBrush x:Key="UserBubble" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#5B7CFA" Offset="0"/>
+            <GradientStop Color="#8B5CF6" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- One template renders every turn; triggers restyle it per role. -->
+        <DataTemplate x:Key="MsgTemplate">
+            <Grid Margin="0,5">
+                <Border x:Name="Bubble" CornerRadius="14" Padding="13,10" MaxWidth="430"
+                        HorizontalAlignment="Left" Background="#1FFFFFFF">
+                    <TextBlock x:Name="Body" Text="{Binding ForDisplay}" TextWrapping="Wrap"
+                               Foreground="#F3F5F8" FontSize="14.5" LineHeight="21"/>
+                </Border>
+            </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Role}" Value="user">
+                    <Setter TargetName="Bubble" Property="HorizontalAlignment" Value="Right"/>
+                    <Setter TargetName="Bubble" Property="Background" Value="{StaticResource UserBubble}"/>
+                    <Setter TargetName="Body" Property="Foreground" Value="White"/>
+                    <Setter TargetName="Body" Property="FontWeight" Value="SemiBold"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Role}" Value="system">
+                    <Setter TargetName="Bubble" Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ForDisplay}" Value="">
+                    <Setter TargetName="Bubble" Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Border CornerRadius="16" Padding="18"
+            Background="#F21A1D27" BorderBrush="#33FFFFFF" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="28" ShadowDepth="0" Opacity="0.65" Color="Black"/>
+        </Border.Effect>
+
+        <DockPanel LastChildFill="True">
+
+            <!-- Header: brand + turn count, then a status line -->
+            <Grid DockPanel.Dock="Top" Margin="0,0,0,12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Orientation="Horizontal">
+                    <Border Width="16" Height="16" CornerRadius="5" Margin="0,0,8,0"
+                            Background="{StaticResource UserBubble}"/>
+                    <TextBlock Text="ScreenAssistant" Foreground="#EAEFFB"
+                               FontSize="13.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </StackPanel>
+                <TextBlock x:Name="TurnText" Grid.Row="0" HorizontalAlignment="Right"
+                           Foreground="{StaticResource Muted}" FontSize="12" VerticalAlignment="Center"/>
+
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,7,0,0">
+                    <TextBlock x:Name="StatusText" Text="Ready"
+                               Foreground="{StaticResource Accent}" FontSize="12" FontWeight="SemiBold"/>
+                    <!-- Animated typing dots, toggled while the model streams -->
+                    <StackPanel x:Name="TypingDots" Orientation="Horizontal"
+                                Visibility="Collapsed" Margin="8,0,0,0" VerticalAlignment="Center">
+                        <StackPanel.Resources>
+                            <Style TargetType="Ellipse">
+                                <Setter Property="Width" Value="5"/>
+                                <Setter Property="Height" Value="5"/>
+                                <Setter Property="Margin" Value="2,0"/>
+                                <Setter Property="Fill" Value="{StaticResource Accent}"/>
+                                <Setter Property="Opacity" Value="0.3"/>
+                            </Style>
+                        </StackPanel.Resources>
+                        <StackPanel.Triggers>
+                            <EventTrigger RoutedEvent="StackPanel.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetName="D1" Storyboard.TargetProperty="Opacity"
+                                                         From="0.3" To="1" Duration="0:0:0.4" AutoReverse="True" BeginTime="0:0:0"/>
+                                        <DoubleAnimation Storyboard.TargetName="D2" Storyboard.TargetProperty="Opacity"
+                                                         From="0.3" To="1" Duration="0:0:0.4" AutoReverse="True" BeginTime="0:0:0.15"/>
+                                        <DoubleAnimation Storyboard.TargetName="D3" Storyboard.TargetProperty="Opacity"
+                                                         From="0.3" To="1" Duration="0:0:0.4" AutoReverse="True" BeginTime="0:0:0.3"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </StackPanel.Triggers>
+                        <Ellipse x:Name="D1"/>
+                        <Ellipse x:Name="D2"/>
+                        <Ellipse x:Name="D3"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+
+            <!-- Footer key hints -->
+            <TextBlock DockPanel.Dock="Bottom" Margin="0,12,0,0"
+                       Foreground="#66FFFFFF" FontSize="11" TextWrapping="Wrap"
+                       Text="↑↓ scroll   ←→ page   Enter ask   N new chat   C copy   Esc hide"/>
+
+            <!-- Optional typed question (hidden until Enter) -->
+            <Border x:Name="QuestionHost" DockPanel.Dock="Bottom" Margin="0,12,0,0"
+                    Visibility="Collapsed" CornerRadius="10" Background="#22FFFFFF"
+                    BorderBrush="#40FFFFFF" BorderThickness="1" Padding="4,2">
+                <TextBox x:Name="QuestionBox" FontSize="14" Background="Transparent"
+                         Foreground="White" BorderThickness="0" Padding="8,7"
+                         CaretBrush="White" VerticalContentAlignment="Center"/>
+            </Border>
+
+            <!-- Transcript -->
+            <ScrollViewer x:Name="AnswerScroll" VerticalScrollBarVisibility="Auto"
+                          Padding="0,0,6,0">
+                <ItemsControl x:Name="Transcript" ItemTemplate="{StaticResource MsgTemplate}"
+                              HorizontalContentAlignment="Stretch"/>
+            </ScrollViewer>
+        </DockPanel>
+    </Border>
+</Window>

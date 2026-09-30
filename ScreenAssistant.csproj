@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <!-- The Windows 10.0.19041 TFM gives direct access to the built-in WinRT
+         OCR engine (Windows.Media.Ocr) and imaging APIs, no NuGet needed. -->
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>ScreenAssistant</AssemblyName>
+    <RootNamespace>ScreenAssistant</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Icon for the .exe (shown in Explorer, taskbar, Alt+Tab). -->
+    <ApplicationIcon>appicon.ico</ApplicationIcon>
+    <!-- DPI awareness is set via the manifest for the WPF side; silence the
+         WinForms-specific advisory about it. -->
+    <NoWarn>WFAC010</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Embed the icon so the tray (NotifyIcon) can load it at runtime,
+         including from the single-file published exe. -->
+    <EmbeddedResource Include="appicon.ico" />
+    <!-- Optional baked-in cloud API key. Ships as a placeholder; the sharer
+         pastes their own free key here before building for zero recipient
+         setup. See SHARING.md. The placeholder is treated as "no key". -->
+    <EmbeddedResource Include="cloud.key" />
+  </ItemGroup>
+
+</Project>
